@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prometeo_UBE · Fuego en microgravedad</title>
+<meta name="description" content="Panel interactivo de seguridad contra incendios en la exploración espacial: simulación de llamas en microgravedad, sensores y datos experimentales de la NASA (PSI).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=Unbounded:wght@500;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<header class="nav">
+  <a class="brand" href="#inicio"><img class="brand-logo" src="logo.png" alt="Logo Prometeo_UBE Space Challenge">Prometeo<span class="us">_</span>UBE</a>
+  <nav>
+    <a href="#simulador">Simulador</a>
+    <a href="#datos">Datos PSI</a>
+    <a href="#catalogo">Catálogo</a>
+    <a href="#asistente">Asistente</a>
+    <a href="#juego">Juego</a>
+    <a href="#juego3d">Juego 3D</a>
+    <a href="#tierra">En la Tierra</a>
+    <a href="#recursos">Recursos</a>
+  </nav>
+</header>
+
+<main>
+<!-- HERO -->
+<section id="inicio" class="hero">
+  <i class="orb o1" aria-hidden="true"></i><i class="orb o2" aria-hidden="true"></i><i class="orb o3" aria-hidden="true"></i>
+  <p class="eyebrow">NASA · Physical Sciences Informatics · Seguridad contra incendios</p>
+  <div class="hero-title"><img class="hero-logo" src="logo.png" alt="Logo Prometeo_UBE Space Challenge"><h1>Prometeo<span class="us">_</span>UBE</h1></div>
+  <p class="lead">Durante décadas, la NASA ha estudiado el comportamiento de las llamas y el fuego en microgravedad, recopilando una gran cantidad de datos experimentales. Este conocimiento es más importante que nunca ahora que la humanidad se prepara para regresar a la Luna y continuar la exploración de Marte; sin embargo, el volumen de resultados dificulta su búsqueda, comparación y comprensión.</p>
+  <p class="lead sub">Prometeo_UBE es un panel interactivo que resume, clasifica e interpreta esos hallazgos para brindar información valiosa sobre seguridad contra incendios en la exploración espacial humana.</p>
+  <div class="hero-cta">
+    <a class="btn primary" href="#simulador">Encender la llama</a>
+    <a class="btn" href="#datos">Explorar los datos</a>
+    <a class="btn" href="#juego">Jugar</a>
+  </div>
+  <div class="hero-badges">
+    <span><b>0 g</b> a <b>1 g</b> simulados</span>
+    <span><b>4</b> conjuntos de datos PSI</span>
+    <span><b>2</b> minijuegos educativos</span>
+    <span>100 % en tu navegador</span>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div class="scroll-hint"><i></i>Desliza para explorar</div>
+</section>
+
+<!-- SIMULADOR -->
+<section id="simulador">
+  <div class="sec-head">
+    <p class="eyebrow">01 · Simulación animada</p>
+    <h2>Cámara de combustión virtual</h2>
+    <p>Varía la gravedad, la atmósfera y el combustible. Observa cómo cambia la forma de la llama, el humo y la respuesta de cada sensor. La temperatura adiabática se toma de la prueba real más cercana del conjunto <em>Flame Design</em> (PSI-10).</p>
+  </div>
+
+  <div class="sim">
+    <div class="stage-wrap">
+      <canvas id="stage" width="900" height="620"></canvas>
+      <div class="stage-hud">
+        <span class="chip" id="hudG">0 g</span>
+        <span class="chip" id="hudMode">Microgravedad</span>
+        <span class="chip warn hidden" id="hudAlarm">⚠ ALARMA DE HUMO</span>
+      </div>
+      <div class="stage-actions">
+        <button class="btn small primary" id="btnIgnite">Encender</button>
+        <button class="btn small" id="btnSuppress">Suprimir (CO₂)</button>
+        <button class="btn small" id="btnReset">Reiniciar</button>
+      </div>
+    </div>
+
+    <aside class="controls">
+      <h3>Condiciones</h3>
+      <div class="presets">
+        <button data-g="0" class="chip-btn active">ISS · 0 g</button>
+        <button data-g="0.166" class="chip-btn">Luna · 0.17 g</button>
+        <button data-g="0.38" class="chip-btn">Marte · 0.38 g</button>
+        <button data-g="1" class="chip-btn">Tierra · 1 g</button>
+      </div>
+      <label>Gravedad <output id="oG">0.00 g</output>
+        <input type="range" id="inG" min="0" max="1" step="0.01" value="0"></label>
+      <label>Oxígeno (XO₂) <output id="oO2">21 %</output>
+        <input type="range" id="inO2" min="18" max="40" step="0.5" value="21"></label>
+      <div class="presets">
+        <button data-o2="21" class="chip-btn o2 active">Aire 21 %</button>
+        <button data-o2="30" class="chip-btn o2">Base lunar 30 %</button>
+        <button data-o2="38" class="chip-btn o2">Alto O₂ 38 %</button>
+      </div>
+      <label>Presión <output id="oP">1.00 atm</output>
+        <input type="range" id="inP" min="0.7" max="1.3" step="0.01" value="1"></label>
+      <label>Velocidad del aire <output id="oV">0 cm/s</output>
+        <input type="range" id="inV" min="0" max="25" step="1" value="0"></label>
+      <label>Combustible
+        <select id="inFuel">
+          <option value="C2H4">Etileno (C₂H₄) · llama de difusión</option>
+          <option value="C3H8">Propano (C₃H₈) · llama de difusión</option>
+          <option value="SIBAL">Tela SIBAL · material sólido (SAFFIRE)</option>
+        </select></label>
+      <label>Dilución del combustible (N₂) <output id="oD">0 %</output>
+        <input type="range" id="inD" min="0" max="90" step="1" value="0"></label>
+      <label>Flujo de combustible <output id="oF">1.2 mg/s</output>
+        <input type="range" id="inF" min="0.3" max="2.6" step="0.1" value="1.2"></label>
+      <p class="note" id="matchNote">—</p>
+    </aside>
+  </div>
+
+  <div class="sensors" id="sensors"></div>
+  <div class="insight" id="insight"></div>
+</section>
+
+<!-- DATOS -->
+<section id="datos">
+  <div class="sec-head">
+    <p class="eyebrow">02 · Datos experimentales</p>
+    <h2>Explorador de datos PSI</h2>
+    <p>Cuatro conjuntos reales del repositorio PSI de la NASA. Filtra, ordena, grafica y envía cualquier prueba de <em>Flame Design</em> al simulador.</p>
+  </div>
+  <div class="tabs" id="tabs">
+    <button data-ds="flame" class="active">Flame Design <small>PSI-10</small></button>
+    <button data-ds="same">SAME-R · humo <small>PSI-101</small></button>
+    <button data-ds="saffire">SAFFIRE-1 <small>PSI-98</small></button>
+    <button data-ds="stdce">STDCE-1 <small>PSI-108</small></button>
+  </div>
+  <div class="explorer">
+    <div class="filters" id="filters"></div>
+    <div class="exp-main">
+      <div class="exp-summary" id="expSummary"></div>
+      <div class="chart-card"><div class="chart-head"><h3 id="chartTitle"></h3><select id="chartSel"></select></div><canvas id="chart" width="900" height="360"></canvas><div class="legend" id="legend"></div></div>
+      <div class="table-wrap"><table id="table"></table></div>
+      <div class="table-foot"><span id="rowCount"></span><button class="btn small" id="btnCsv">Descargar CSV filtrado</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- CATALOGO -->
+<section id="catalogo">
+  <div class="sec-head">
+    <p class="eyebrow">03 · Clasificación</p>
+    <h2>Catálogo de investigaciones</h2>
+    <p>Elige tu perfil y el uso que buscas: las investigaciones se reordenan según su relevancia para la seguridad contra incendios.</p>
+  </div>
+  <div class="cat-controls">
+    <div class="seg" id="segUse">
+      <button data-use="habitat" class="active">Entornos habitables</button>
+      <button data-use="modelos">Modelos predictivos</button>
+      <button data-use="sistemas">Sistemas y equipos</button>
+    </div>
+    <div class="seg" id="segCat">
+      <button data-cat="all" class="active">Todas</button>
+      <button data-cat="prevencion">Prevención</button>
+      <button data-cat="deteccion">Detección</button>
+      <button data-cat="supresion">Supresión</button>
+    </div>
+  </div>
+  <div class="cards" id="cards"></div>
+  <div class="compare">
+    <h3>Comparar investigaciones</h3>
+    <p class="muted">Selecciona hasta 3 tarjetas con «Comparar».</p>
+    <div class="table-wrap"><table id="cmpTable"></table></div>
+  </div>
+</section>
+
+<!-- ASISTENTE -->
+<section id="asistente">
+  <div class="sec-head">
+    <p class="eyebrow">04 · Asistente de análisis</p>
+    <h2>Pregunta a Prometeo</h2>
+    <p>Motor de análisis local: interpreta tu pregunta, busca en el catálogo y calcula estadísticas sobre los datos cargados. No envía información a ningún servidor.</p>
+  </div>
+  <div class="assistant">
+    <div class="chat" id="chat"></div>
+    <form id="chatForm">
+      <input id="chatIn" placeholder="Ej.: ¿qué estudio sirve para el detector de humo de una base lunar?" autocomplete="off">
+      <button class="btn primary" type="submit">Analizar</button>
+    </form>
+    <div class="suggest" id="suggest"></div>
+  </div>
+</section>
+
+<!-- JUEGO -->
+<section id="juego">
+  <div class="sec-head">
+    <p class="eyebrow">05 · Mini juego</p>
+    <h2>Astro Extintor: apaga el fuego</h2>
+    <p>Eres el astronauta de guardia. Cada llama pide un agente distinto: elige bien, vigila tus tanques y ten cuidado, en microgravedad el extintor te empuja hacia atrás. Aguanta oleadas dentro de la nave y en una caminata espacial.</p>
+  </div>
+  <div class="game">
+    <div class="game-stage">
+      <canvas id="gameCv" width="900" height="560"></canvas>
+      <div class="game-overlay" id="gameStart">
+        <img src="logo.png" alt="" class="game-logo">
+        <h3>¡Fuego a bordo!</h3>
+        <p>Muévete con <b>WASD</b> o las flechas, apunta con el ratón y rocía con <b>clic</b> o <b>Espacio</b>. En el móvil: joystick izquierdo para moverte y joystick derecho para apuntar y rociar.</p>
+        <button class="btn primary" id="gPlay" type="button">Empezar misión</button>
+      </div>
+      <div class="game-overlay hidden" id="gameOver">
+        <h3>Misión terminada</h3>
+        <div class="go-stats"><div><b id="goScore">0</b><span>puntos</span></div><div><b id="goBest">0</b><span>récord</span></div><div><b id="goWave">0</b><span>oleada</span></div><div><b id="goKills">0</b><span>llamas apagadas</span></div></div>
+        <button class="btn primary" id="gAgain" type="button">Reintentar</button>
+      </div>
+    </div>
+    <aside class="game-side">
+      <h3>Agentes</h3>
+      <div class="agents" id="gameAgents"></div>
+      <div class="game-btns">
+        <button class="btn small" id="gVisor" type="button">Visor térmico: OFF (V)</button>
+        <button class="btn small" id="gPause" type="button">⏸ Pausa (P)</button>
+        <button class="btn small" id="gSound" type="button">🔊 Sonido: ON (M)</button>
+      </div>
+      <p class="note">Teclas 1·2·3 cambian de agente. Q/E giran la puntería sin ratón. Los tanques se rellenan en la estación verde.</p>
+    </aside>
+  </div>
+  <h3 class="guide-title">Guía de llamas</h3>
+  <div class="flame-guide" id="flameGuide"></div>
+  <p class="muted" style="font-size:.82rem;margin-top:12px">Juego educativo y simplificado: no sustituye procedimientos reales de seguridad. En el vacío no hay aire que alimente una llama; en el juego, el fuego exterior representa fugas de propelente que se queman al mezclarse con oxígeno expulsado.</p>
+</section>
+
+<!-- JUEGO 3D -->
+<section id="juego3d">
+  <div class="sec-head">
+    <p class="eyebrow">06 · Mini juego 3D</p>
+    <h2>Vuelo entre llamas: esquiva y recarga</h2>
+    <p>Flota por el túnel de la estación en microgravedad. Las llamas de metano, etano, propano y más vienen de frente, y cada mes de misión la velocidad sube y aparecen llamas nuevas. Esquívalas y recoge tanques de O₂, CO₂, H₂O, N₂ y CO para sumar puntos y seguir con vida.</p>
+  </div>
+  <div class="game">
+    <div class="game-stage">
+      <canvas id="g3Cv" width="900" height="560"></canvas>
+      <div class="game-overlay" id="g3Start">
+        <img src="logo.png" alt="" class="game-logo">
+        <h3>¡Vuelo entre llamas!</h3>
+        <p>Muévete con <b>WASD</b>, las flechas o el ratón. <b>Espacio</b> da un impulso de esquiva (te hace atravesar las llamas, con enfriamiento). En el móvil, arrastra el dedo. Vigila tu <b>oxígeno</b>: baja con el tiempo.</p>
+        <button class="btn primary" id="g3Play" type="button">Empezar misión</button>
+      </div>
+      <div class="game-overlay hidden" id="g3Over">
+        <h3>Misión terminada</h3>
+        <p class="go-cause" id="g3Cause"></p>
+        <div class="go-stats"><div><b id="g3Score">0</b><span>puntos</span></div><div><b id="g3Best">0</b><span>récord</span></div><div><b id="g3Month">0</b><span>mes alcanzado</span></div><div><b id="g3Tanks2">0</b><span>tanques</span></div></div>
+        <button class="btn primary" id="g3Again" type="button">Reintentar</button>
+      </div>
+    </div>
+    <aside class="game-side">
+      <h3>Tanques</h3>
+      <div class="g3-list" id="g3Tanks"></div>
+      <div class="game-btns">
+        <button class="btn small" id="g3Pause" type="button">⏸ Pausa (P)</button>
+        <button class="btn small" id="g3Sound" type="button">🔊 Sonido: ON (M)</button>
+      </div>
+      <p class="note">Roza las llamas sin tocarlas para ganar puntos extra. Encadena tanques seguidos para subir el combo.</p>
+    </aside>
+  </div>
+  <h3 class="guide-title">Guía de llamas</h3>
+  <div class="flame-guide" id="g3FlameGuide"></div>
+  <p class="muted" style="font-size:.82rem;margin-top:12px">Juego educativo y simplificado: no sustituye procedimientos reales de seguridad. En la vida real no se recogen tanques en pleno incendio: el monóxido de carbono (CO), por ejemplo, es un gas tóxico que se debe evitar.</p>
+</section>
+
+<!-- TIERRA -->
+<section id="tierra">
+  <div class="sec-head">
+    <p class="eyebrow">07 · Del espacio a la Tierra</p>
+    <h2>Aplicaciones terrestres</h2>
+  </div>
+  <div class="earth">
+    <article><h4>Extintores de niebla fina</h4><p>Desarrollados para la ISS, hoy protegen edificios y museos con menos agua y menos daños colaterales.</p></article>
+    <article><h4>Detectores de humo</h4><p>La tecnología creada para el transbordador distingue humo de polvo y reduce falsas alarmas, útil en minería e industria.</p><a href="https://spinoff.nasa.gov/node/9407" target="_blank" rel="noopener">Ver spin-off →</a></article>
+    <article><h4>Equipo para bomberos</h4><p>Trajes espaciales inspiraron tanques de aire más ligeros y vestimenta protectora mejorada.</p><a href="https://spinoff.nasa.gov/node/9582" target="_blank" rel="noopener">Tanques de aire →</a> · <a href="https://spinoff.nasa.gov/node/9918" target="_blank" rel="noopener">Indumentaria →</a></article>
+    <article><h4>Motores y energía limpia</h4><p>Modelos de hollín, llamas frías y combustión pobre mejoran eficiencia y reducen emisiones en la Tierra.</p></article>
+  </div>
+  <div class="history">
+    <h3>Lecciones históricas</h3>
+    <ol>
+      <li><b>1967 · Apolo 1</b>: incendio en una cabina con oxígeno puro durante una prueba previa al lanzamiento.</li>
+      <li><b>1970 · Apolo 13</b>: explosión de un tanque de oxígeno camino a la Luna.</li>
+      <li><b>1997 · Mir</b>: incendio por falla del generador de oxígeno; la tripulación sobrevivió.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- RECURSOS -->
+<section id="recursos">
+  <div class="sec-head">
+    <p class="eyebrow">08 · Fuentes</p>
+    <h2>Datos y recursos de la NASA</h2>
+  </div>
+  <ul class="links">
+    <li><a href="https://psi.nasa.gov/physci/repo/search?q=combustion" target="_blank" rel="noopener">Repositorio PSI: Ciencia de la combustión</a><span>Fuente de datos principal.</span></li>
+    <li><a href="https://www.nasa.gov/glenn/glenn-expertise-space-exploration/physical-sciences-program/combustion-science/" target="_blank" rel="noopener">Ciencia de la combustión de la NASA</a><span>Información básica de las investigaciones.</span></li>
+    <li><a href="https://www.youtube.com/watch?v=W1oXykoz9zg" target="_blank" rel="noopener">ScienceCasts: El poder del estudio de la combustión en la ISS</a><span>Video de 3,6 min (2018).</span></li>
+    <li><a href="https://www.nasa.gov/missions/station/a-researchers-guide-to-combustion-science/" target="_blank" rel="noopener">Guía para investigadores sobre ciencia de la combustión</a><span>Revisión de 2015.</span></li>
+    <li><a href="https://sma.nasa.gov/sma-disciplines/accllp/apollo-1" target="_blank" rel="noopener">Apolo 1</a><span>Incendio, investigación y lecciones.</span></li>
+    <li><a href="https://sma.nasa.gov/sma-disciplines/accllp/apollo-13" target="_blank" rel="noopener">Apolo 13</a><span>Explosión del tanque de oxígeno.</span></li>
+    <li><a href="https://www.nasa.gov/history/25-years-ago-fire-aboard-space-station-mir/" target="_blank" rel="noopener">Incendio a bordo de la estación Mir</a><span>1997, generador de oxígeno.</span></li>
+    <li><a href="https://spinoff.nasa.gov/node/9582" target="_blank" rel="noopener">Tanques de aire para bomberos</a><span>Spin-off de trajes espaciales.</span></li>
+    <li><a href="https://spinoff.nasa.gov/node/9407" target="_blank" rel="noopener">Detector de incendios</a><span>Distingue humo de polvo.</span></li>
+    <li><a href="https://spinoff.nasa.gov/node/9918" target="_blank" rel="noopener">Nueva tecnología para indumentaria de bomberos</a><span>Spin-off de los años 80.</span></li>
+  </ul>
+</section>
+</main>
+
+<button id="toTop" type="button" aria-label="Volver arriba">↑</button>
+
+<footer>
+  <img class="foot-logo" src="logo.png" alt="">
+  <div class="foot-links"><a href="#simulador">Simulador</a><a href="#datos">Datos PSI</a><a href="#catalogo">Catálogo</a><a href="#juego">Juegos</a><a href="#recursos">Recursos</a></div>
+  <p><b>Prometeo<span class="us">_</span>UBE</b> · Proyecto educativo basado en datos públicos de la NASA (PSI). La simulación es un modelo cualitativo con fines didácticos; no sustituye análisis de ingeniería ni normas de seguridad.</p>
+</footer>
+
+<script src="data.demo.js"></script> <!-- cámbialo por data.js cuando tengas los CSV reales -->
+<script src="catalog.js"></script>
+<script src="sim.js"></script>
+<script src="explorer.js"></script>
+<script src="game.js"></script>
+<script src="game3d.js"></script>
+<script src="main.js"></script>
+<script src="fx.js"></script>
+</body>
+</html>
